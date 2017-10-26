@@ -9,4 +9,10 @@ describe('dataplug-http', () => {
       .should.have.property('HttpGetReader')
       .that.is.an('function')
   })
+
+  it('has "PagedHttpGetReader" class', () => {
+    dataplugHttp
+      .should.have.property('PagedHttpGetReader')
+      .that.is.an('function')
+  })
 })
