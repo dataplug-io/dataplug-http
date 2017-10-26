@@ -3,7 +3,6 @@ require('chai')
   .use(require('chai-as-promised'))
   .should()
 const nock = require('nock')
-const { PassThrough } = require('stream')
 const Promise = require('bluebird')
 const { PagedHttpGetReader } = require('../lib')
 
@@ -51,25 +50,6 @@ describe('PagedHttpGetReader', () => {
         .on('error', reject)
         .on('data', (chunk) => { data += chunk })
     }).should.eventually.be.equal('data').and.notify(done)
-  })
-
-  it('reads data via transform', (done) => {
-    nock('http://dataplug.io')
-      .get('/data')
-      .reply(200, 'data')
-
-    const transform = new PassThrough()
-    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page) => false, transform)
-    new Promise((resolve, reject) => {
-      let data = ''
-      reader
-        .on('error', reject)
-      transform
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    }).should.eventually.be.equal('data').and.notify(done)
-    reader.resume()
   })
 
   it('reads data from 4 pages', (done) => {
