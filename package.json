@@ -1,6 +1,6 @@
 {
   "name": "@dataplug/dataplug-http",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Dataplug HTTP library (by Dataplug.io)",
   "main": "lib/index.js",
   "scripts": {
