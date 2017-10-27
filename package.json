@@ -17,14 +17,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dataplug-io/dataplug-xml.git"
+    "url": "git+https://github.com/dataplug-io/dataplug-http.git"
   },
   "author": "",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/dataplug-io/dataplug-xml/issues"
+    "url": "https://github.com/dataplug-io/dataplug-http/issues"
   },
-  "homepage": "https://github.com/dataplug-io/dataplug-xml#readme",
+  "homepage": "https://github.com/dataplug-io/dataplug-http#readme",
   "dependencies": {
     "bluebird": "^3.5.1",
     "request": "^2.83.0",
