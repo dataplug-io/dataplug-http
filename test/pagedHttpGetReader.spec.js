@@ -71,7 +71,9 @@ describe('PagedHttpGetReader', () => {
       .get('/data')
       .reply(200, 'data')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page) => false, () => new PassThrough())
+    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page) => false, {
+      transformFactory: () => new PassThrough()
+    })
     new Promise((resolve, reject) => {
       let data = ''
       reader
@@ -179,7 +181,9 @@ describe('PagedHttpGetReader', () => {
         return true
       }
       return false
-    }, () => new PassThrough())
+    }, {
+      transformFactory: () => new PassThrough()
+    })
     new Promise((resolve, reject) => {
       let data = ''
       reader
@@ -215,7 +219,9 @@ describe('PagedHttpGetReader', () => {
         return true
       }
       return false
-    }, () => new PassThrough())
+    }, {
+      transformFactory: () => new PassThrough()
+    })
     new Promise((resolve, reject) => {
       let data = ''
       reader
@@ -233,14 +239,12 @@ describe('PagedHttpGetReader', () => {
       .get('/data')
       .reply(200, 'data')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/no-data', (page) => false)
-    new Promise((resolve, reject) => {
-      const captured = {}
+    const reader = new PagedHttpGetReader('http://dataplug.io/no-data', (page) => false, {
+      abortOnError: true
+    })
+    new Promise((resolve) => {
       reader
-        .on('end', () => resolve(captured.error))
-        .on('error', (error) => {
-          captured.error = error
-        })
+        .on('error', resolve)
     })
       .should.eventually.be.match(/No match for request/)
       .and.notify(done)
@@ -269,19 +273,12 @@ describe('PagedHttpGetReader', () => {
         return true
       }
       return false
+    }, {
+      abortOnError: true
     })
-    new Promise((resolve, reject) => {
-      const captured = {}
-      let data = ''
+    new Promise((resolve) => {
       reader
-        .on('end', () => {
-          data.should.be.equal('data')
-          resolve(captured.error)
-        })
-        .on('error', (error) => {
-          captured.error = error
-        })
-        .on('data', (chunk) => { data += chunk })
+        .on('error', resolve)
     })
       .should.eventually.be.match(/No match for request/)
       .and.notify(done)
@@ -294,14 +291,13 @@ describe('PagedHttpGetReader', () => {
       .get('/data')
       .reply(200, 'data')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/no-data/transform', (page) => false, () => new PassThrough())
-    new Promise((resolve, reject) => {
-      const captured = {}
+    const reader = new PagedHttpGetReader('http://dataplug.io/no-data/transform', (page) => false, {
+      transformFactory: () => new PassThrough(),
+      abortOnError: true
+    })
+    new Promise((resolve) => {
       reader
-        .on('end', () => resolve(captured.error))
-        .on('error', (error) => {
-          captured.error = error
-        })
+        .on('error', resolve)
     })
       .should.eventually.be.match(/No match for request/)
       .and.notify(done)
@@ -314,18 +310,17 @@ describe('PagedHttpGetReader', () => {
       .get('/data')
       .reply(200, 'data')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page) => false, () => new Transform({
-      transform: (chunk, encoding, callback) => {
-        callback(new Error('expected'), null)
-      }
-    }))
-    new Promise((resolve, reject) => {
-      const captured = {}
+    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page) => false, {
+      transformFactory: () => new Transform({
+        transform: (chunk, encoding, callback) => {
+          callback(new Error('expected'), null)
+        }
+      }),
+      abortOnError: true
+    })
+    new Promise((resolve) => {
       reader
-        .on('end', () => resolve(captured.error))
-        .on('error', (error) => {
-          captured.error = error
-        })
+        .on('error', resolve)
     })
       .should.eventually.be.match(/expected/)
       .and.notify(done)
@@ -354,21 +349,71 @@ describe('PagedHttpGetReader', () => {
         return true
       }
       return false
-    }, () => new PassThrough())
-    new Promise((resolve, reject) => {
-      const captured = {}
-      let data = ''
+    }, {
+      transformFactory: () => new PassThrough(),
+      abortOnError: true
+    })
+    new Promise((resolve) => {
       reader
-        .on('end', () => {
-          data.should.be.equal('data')
-          resolve(captured.error)
-        })
-        .on('error', (error) => {
-          captured.error = error
-        })
-        .on('data', (chunk) => { data += chunk })
+        .on('error', resolve)
     })
       .should.eventually.be.match(/No match for request/)
+      .and.notify(done)
+    reader.resume()
+  })
+
+  it('handles retry', (done) => {
+    nock.cleanAll()
+    nock('http://dataplug.io')
+      .get('/data/1')
+      .reply(200, 'd')
+      .get('/data/2')
+      .reply(200, 'a')
+      .get('/data/3')
+      .reply(429)
+      .get('/data/4')
+      .reply(200, 'a')
+
+    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page) => {
+      if (page && page.url === 'http://dataplug.io/data/1') {
+        page.url = 'http://dataplug.io/data/2'
+        return true
+      } else if (page && page.url === 'http://dataplug.io/data/2') {
+        page.url = 'http://dataplug.io/data/3'
+        return true
+      } else if (page && page.url === 'http://dataplug.io/data/3') {
+        page.url = 'http://dataplug.io/data/4'
+        return true
+      }
+      return false
+    }, {
+      transformFactory: () => new PassThrough(),
+      responseHandler: (response) => {
+        if (response.statusCode === 429) {
+          nock.cleanAll()
+          nock('http://dataplug.io')
+            .get('/data/1')
+            .reply(200, 'd')
+            .get('/data/2')
+            .reply(200, 'a')
+            .get('/data/3')
+            .reply(200, 't')
+            .get('/data/4')
+            .reply(200, 'a')
+          return false
+        }
+
+        return true
+      }
+    })
+    new Promise((resolve, reject) => {
+      let data = ''
+      reader
+        .on('end', () => resolve(data))
+        .on('error', reject)
+        .on('data', (chunk) => { data += chunk })
+    })
+      .should.eventually.be.equal('data')
       .and.notify(done)
     reader.resume()
   })
