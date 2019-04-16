@@ -2,13 +2,18 @@
   "name": "@dataplug/dataplug-http",
   "version": "0.15.0",
   "description": "Dataplug HTTP library (by Dataplug.io)",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "jsdoc": "jsdoc --destination ./docs --recurse ./lib --verbose",
-    "lint": "standard",
-    "test": "nyc --reporter=none mocha",
-    "coverage": "nyc report --reporter=html --reporter=text",
-    "coveralls": "nyc report --reporter=text-lcov | coveralls",
+    "prepublishOnly": "npm run preversion && npm run prepare:production",
+    "postpublish": "rimraf dist",
+    "prepare:production": "rimraf dist && tsc",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "docs": "typedoc --out ./docs ./src",
+    "lint": "tslint -p tsconfig.json -c tslint.json",
+    "test": "mocha -r ts-node/register ./test/*spec.ts",
+    "coverage": "nyc -r lcov -e .ts -x \"*.ts\" mocha -r ts-node/register test/*.spec.ts && nyc report --reporter=html --reporter=text",
+    "coveralls": "nyc -e .ts -x \"*.ts\" mocha -r ts-node/register test/*.spec.ts && nyc report --reporter=text-lcov | coveralls",
     "preversion": "npm run lint && npm run test",
     "postversion": "git push && git push --tags"
   },
@@ -33,6 +38,12 @@
     "winston": "^2.4.0"
   },
   "devDependencies": {
+    "@types/bluebird": "^3.5.26",
+    "@types/check-types": "^7.3.1",
+    "@types/mocha": "^5.2.6",
+    "@types/nock": "^9.3.1",
+    "@types/request": "^2.48.1",
+    "@types/winston": "^2.4.4",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "coveralls": "^3.0.0",
@@ -40,6 +51,17 @@
     "mocha": "^4.0.1",
     "nock": "^9.1.0",
     "nyc": "^11.3.0",
-    "standard": "^10.0.3"
+    "prettier": "^1.15.2",
+    "rimraf": "^2.6.2",
+    "standard": "^10.0.3",
+    "ts-loader": "^4.4.2",
+    "ts-node": "^7.0.1",
+    "tsconfig-paths": "^3.5.0",
+    "tslint": "5.11.0",
+    "tslint-config-prettier": "^1.17.0",
+    "tslint-config-standard": "^8.0.1",
+    "tslint-plugin-prettier": "^2.0.1",
+    "typedoc": "^0.13.0",
+    "typescript": "^3.1.6"
   }
 }

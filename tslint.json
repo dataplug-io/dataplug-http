@@ -1,0 +1,22 @@
+{
+    "extends": [
+      "tslint-config-standard",
+      "tslint-config-prettier"
+    ],
+    "rulesDirectory": [
+      "tslint-plugin-prettier"
+    ],
+    "rules": {
+      "await-promise": [
+        true,
+        "Bluebird"
+      ],
+      "prettier": true
+    },
+    "linterOptions": {
+      "exclude": [
+        "**/*.js",
+        "node_modules/**/*.ts"
+      ]
+    }
+  }
