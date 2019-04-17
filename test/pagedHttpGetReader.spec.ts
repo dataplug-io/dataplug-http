@@ -1,14 +1,14 @@
-/* eslint-env node, mocha */
+// Copyright (C) 2017-2019 Brainbean Apps OU (https://brainbeanapps.com).
+// License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+
 import 'ts-jest'
-
 import nock from 'nock'
+import { Promise as BluebirdPromise } from 'bluebird'
 import { PassThrough, Transform } from 'stream'
-import { PagedHttpGetReader } from '../lib'
-
-const BPromise = require('bluebird')
+import { PagedHttpGetReader } from '../src'
 
 describe('PagedHttpGetReader', () => {
-  it('reads no data via HTTP with empty response', (done: any) => {
+  it('reads no data via HTTP with empty response', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
@@ -16,7 +16,7 @@ describe('PagedHttpGetReader', () => {
 
     const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false)
     expect(
-      new BPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
@@ -28,7 +28,7 @@ describe('PagedHttpGetReader', () => {
       .then(done)
   })
 
-  it('reads no data when server replies 404 HTTP', (done: any) => {
+  it('reads no data when server replies 404 HTTP', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
@@ -36,7 +36,7 @@ describe('PagedHttpGetReader', () => {
 
     const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false)
     expect(
-      new BPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
@@ -48,7 +48,7 @@ describe('PagedHttpGetReader', () => {
       .then(done)
   })
 
-  it('reads data', (done: any) => {
+  it('reads data', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
@@ -56,7 +56,7 @@ describe('PagedHttpGetReader', () => {
 
     const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false)
     expect(
-      new BPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
@@ -68,7 +68,7 @@ describe('PagedHttpGetReader', () => {
       .then(done)
   })
 
-  it('reads data via transform', (done: any) => {
+  it('reads data via transform', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
@@ -78,7 +78,7 @@ describe('PagedHttpGetReader', () => {
       transformFactory: () => new PassThrough()
     })
     expect(
-      new BPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
@@ -90,7 +90,7 @@ describe('PagedHttpGetReader', () => {
       .then(done)
   })
 
-  it('reads data from 4 pages', (done: any) => {
+  it('reads data from 4 pages', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data/1')
@@ -116,7 +116,7 @@ describe('PagedHttpGetReader', () => {
       return false
     })
     expect(
-      new BPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
@@ -128,7 +128,7 @@ describe('PagedHttpGetReader', () => {
       .then(done)
   })
 
-  it('reads data from 3 pages and 1 missing page', (done: any) => {
+  it('reads data from 3 pages and 1 missing page', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data/1')
@@ -154,7 +154,7 @@ describe('PagedHttpGetReader', () => {
       return false
     })
     expect(
-      new BPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
@@ -166,7 +166,7 @@ describe('PagedHttpGetReader', () => {
       .then(done)
   })
 
-  it('reads data from 4 pages via transform', (done: any) => {
+  it('reads data from 4 pages via transform', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data/1')
@@ -194,7 +194,7 @@ describe('PagedHttpGetReader', () => {
       transformFactory: () => new PassThrough()
     })
     expect(
-      new BPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
@@ -206,7 +206,7 @@ describe('PagedHttpGetReader', () => {
       .then(done)
   })
 
-  it('reads data from 3 pages and 1 missing page via transform', (done: any) => {
+  it('reads data from 3 pages and 1 missing page via transform', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data/1')
@@ -234,7 +234,7 @@ describe('PagedHttpGetReader', () => {
       transformFactory: () => new PassThrough()
     })
     expect(
-      new BPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
@@ -246,7 +246,7 @@ describe('PagedHttpGetReader', () => {
       .then(done)
   })
 
-  it('handles error', (done: any) => {
+  it('handles error', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
@@ -256,7 +256,7 @@ describe('PagedHttpGetReader', () => {
       abortOnError: true
     })
     expect(
-      new BPromise((resolve: any) => {
+      new BluebirdPromise((resolve: any) => {
         reader
           .on('error', resolve)
       })
@@ -266,7 +266,7 @@ describe('PagedHttpGetReader', () => {
     reader.resume()
   })
 
-  it('handles error with 4 pages', (done: any) => {
+  it('handles error with 4 pages', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data/1')
@@ -292,7 +292,7 @@ describe('PagedHttpGetReader', () => {
       abortOnError: true
     })
     expect(
-      new BPromise((resolve: any) => {
+      new BluebirdPromise((resolve: any) => {
         reader
           .on('error', resolve)
       })
@@ -302,7 +302,7 @@ describe('PagedHttpGetReader', () => {
     reader.resume()
   })
 
-  it('handles error via transform', (done: any) => {
+  it('handles error via transform', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
@@ -313,7 +313,7 @@ describe('PagedHttpGetReader', () => {
       abortOnError: true
     })
     expect(
-      new BPromise((resolve: any) => {
+      new BluebirdPromise((resolve: any) => {
         reader
           .on('error', resolve)
       })
@@ -323,7 +323,7 @@ describe('PagedHttpGetReader', () => {
     reader.resume()
   })
 
-  it('handles error in transform', (done: any) => {
+  it('handles error in transform', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
@@ -338,7 +338,7 @@ describe('PagedHttpGetReader', () => {
       abortOnError: true
     })
     expect(
-      new BPromise((resolve: any) => {
+      new BluebirdPromise((resolve: any) => {
         reader
           .on('error', resolve)
       })
@@ -348,7 +348,7 @@ describe('PagedHttpGetReader', () => {
     reader.resume()
   })
 
-  it('handles error with 4 pages via transform', (done: any) => {
+  it('handles error with 4 pages via transform', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data/1')
@@ -375,7 +375,7 @@ describe('PagedHttpGetReader', () => {
       abortOnError: true
     })
     expect(
-      new BPromise((resolve) => {
+      new BluebirdPromise((resolve) => {
         reader
           .on('error', resolve)
       })
@@ -386,7 +386,7 @@ describe('PagedHttpGetReader', () => {
     reader.resume()
   })
 
-  it('handles retry', (done: any) => {
+  it('handles retry', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data/1')
@@ -431,7 +431,7 @@ describe('PagedHttpGetReader', () => {
       }
     })
     expect(
-      new BPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         let data = ''
         reader
           .on('end', () => resolve(data))

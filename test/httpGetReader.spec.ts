@@ -1,14 +1,14 @@
-/* eslint-env node, mocha */
+// Copyright (C) 2017-2019 Brainbean Apps OU (https://brainbeanapps.com).
+// License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+
 import 'ts-jest'
-
 import nock from 'nock'
+import { Promise as BluebirdPromise } from 'bluebird'
 import { PassThrough, Transform } from 'stream'
-import { HttpGetReader } from '../lib'
-
-const BPromise = require('bluebird')
+import { HttpGetReader } from '../src'
 
 describe('HttpGetReader', () => {
-  it('reads no data via HTTP with empty response', (done: any) => {
+  it('reads no data via HTTP with empty response', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
@@ -16,7 +16,7 @@ describe('HttpGetReader', () => {
 
     const reader = new HttpGetReader('http://dataplug.io/data')
     expect(
-      new BPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
@@ -28,7 +28,7 @@ describe('HttpGetReader', () => {
       .then(done)
   })
 
-  it('reads no data when server replies 404 HTTP', (done: any) => {
+  it('reads no data when server replies 404 HTTP', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
@@ -36,7 +36,7 @@ describe('HttpGetReader', () => {
 
     const reader = new HttpGetReader('http://dataplug.io/data')
     expect(
-      new BPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
@@ -48,7 +48,7 @@ describe('HttpGetReader', () => {
       .then(done)
   })
 
-  it('reads data', (done: any) => {
+  it('reads data', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
@@ -56,7 +56,7 @@ describe('HttpGetReader', () => {
 
     const reader = new HttpGetReader('http://dataplug.io/data')
     expect(
-      new BPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
@@ -68,7 +68,7 @@ describe('HttpGetReader', () => {
       .then(done)
   })
 
-  it('reads data via transform', (done: any) => {
+  it('reads data via transform', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
@@ -79,7 +79,7 @@ describe('HttpGetReader', () => {
       transform
     })
     expect(
-      new BPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         let data = ''
         reader
           .on('error', reject)
@@ -94,7 +94,7 @@ describe('HttpGetReader', () => {
     reader.resume()
   })
 
-  it('handles error', (done: any) => {
+  it('handles error', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
@@ -104,7 +104,7 @@ describe('HttpGetReader', () => {
       abortOnError: true
     })
     expect(
-      new BPromise((resolve: any) => {
+      new BluebirdPromise((resolve: any) => {
         reader
           .on('error', resolve)
       })
@@ -114,7 +114,7 @@ describe('HttpGetReader', () => {
     reader.resume()
   })
 
-  it('handles error (no-abort)', (done: any) => {
+  it('handles error (no-abort)', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
@@ -124,12 +124,14 @@ describe('HttpGetReader', () => {
       abortOnError: false
     })
     expect(
-      new BPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
           .on('error', reject)
-          .on('data', (chunk: any) => { data += chunk })
+          .on('data', (chunk: any) => {
+            data += chunk
+          })
       })
     )
       .resolves.toEqual('')
@@ -137,7 +139,7 @@ describe('HttpGetReader', () => {
     reader.resume()
   })
 
-  it('handles error with transform', (done: any) => {
+  it('handles error with transform', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
@@ -149,7 +151,7 @@ describe('HttpGetReader', () => {
       abortOnError: true
     })
     expect(
-      new BPromise((resolve: any) => {
+      new BluebirdPromise((resolve: any) => {
         reader
           .on('error', resolve)
       })
@@ -159,7 +161,7 @@ describe('HttpGetReader', () => {
     reader.resume()
   })
 
-  it('handles error in transform', (done: any) => {
+  it('handles error in transform', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
@@ -175,7 +177,7 @@ describe('HttpGetReader', () => {
       abortOnError: true
     })
     expect(
-      new BPromise((resolve: any) => {
+      new BluebirdPromise((resolve: any) => {
         reader
           .on('error', resolve)
       })

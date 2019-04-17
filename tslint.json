@@ -1,22 +1,22 @@
 {
-    "extends": [
-      "tslint-config-standard",
-      "tslint-config-prettier"
+  "extends": [
+    "tslint-config-standard",
+    "tslint-config-prettier"
+  ],
+  "rulesDirectory": [
+    "tslint-plugin-prettier"
+  ],
+  "rules": {
+    "await-promise": [
+      true,
+      "Bluebird"
     ],
-    "rulesDirectory": [
-      "tslint-plugin-prettier"
-    ],
-    "rules": {
-      "await-promise": [
-        true,
-        "Bluebird"
-      ],
-      "prettier": true
-    },
-    "linterOptions": {
-      "exclude": [
-        "**/*.js",
-        "node_modules/**/*.ts"
-      ]
-    }
+    "prettier": true
+  },
+  "linterOptions": {
+    "exclude": [
+      "**/*.js",
+      "node_modules/**/*.ts"
+    ]
   }
+}

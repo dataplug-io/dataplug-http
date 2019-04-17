@@ -3,6 +3,13 @@
 #TODO: use orphan gh-pages branch to publish docs
 docs
 
+## Origin: https://github.com/github/gitignore/blob/master/Global/VisualStudioCode.gitignore
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
 ## Origin: https://github.com/github/gitignore/blob/master/Node.gitignore
 # Logs
 logs
