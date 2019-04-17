@@ -1,18 +1,15 @@
 /* eslint-env node, mocha */
-require('chai')
-  .should()
+import 'ts-jest'
 const dataplugHttp = require('../lib')
 
 describe('dataplug-http', () => {
   it('has "HttpGetReader" class', () => {
-    dataplugHttp
-      .should.have.property('HttpGetReader')
-      .that.is.an('function')
+    expect(dataplugHttp).toHaveProperty('HttpGetReader')
+    expect(typeof dataplugHttp).toBe('function')
   })
 
   it('has "PagedHttpGetReader" class', () => {
-    dataplugHttp
-      .should.have.property('PagedHttpGetReader')
-      .that.is.an('function')
+    expect(dataplugHttp).toHaveProperty('PagedHttpGetReader')
+    expect(typeof dataplugHttp.PagedHttpGetReader).toBe('function')
   })
 })

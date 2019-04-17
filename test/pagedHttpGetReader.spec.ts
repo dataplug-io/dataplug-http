@@ -1,16 +1,11 @@
 /* eslint-env node, mocha */
+import 'ts-jest'
+
 import nock from 'nock'
 import { PassThrough, Transform } from 'stream'
-import logger from 'winston'
 import { PagedHttpGetReader } from '../lib'
 
-require('chai')
-  .use(require('chai-as-promised'))
-  .should()
-
 const BPromise = require('bluebird')
-
-logger.clear()
 
 describe('PagedHttpGetReader', () => {
   it('reads no data via HTTP with empty response', (done: any) => {
@@ -20,15 +15,17 @@ describe('PagedHttpGetReader', () => {
       .reply(200)
 
     const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false)
-    new BPromise((resolve: any, reject: any) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('')
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('')
+      .then(done)
   })
 
   it('reads no data when server replies 404 HTTP', (done: any) => {
@@ -38,15 +35,17 @@ describe('PagedHttpGetReader', () => {
       .reply(404)
 
     const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false)
-    new BPromise((resolve: any, reject: any) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk: any) => { data += chunk })
-    })
-      .should.eventually.be.equal('')
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk: any) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('')
+      .then(done)
   })
 
   it('reads data', (done: any) => {
@@ -56,15 +55,17 @@ describe('PagedHttpGetReader', () => {
       .reply(200, 'data')
 
     const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false)
-    new BPromise((resolve: any, reject: any) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
   })
 
   it('reads data via transform', (done: any) => {
@@ -76,15 +77,17 @@ describe('PagedHttpGetReader', () => {
     const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false, {
       transformFactory: () => new PassThrough()
     })
-    new BPromise((resolve: any, reject: any) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
   })
 
   it('reads data from 4 pages', (done: any) => {
@@ -112,15 +115,17 @@ describe('PagedHttpGetReader', () => {
       }
       return false
     })
-    new BPromise((resolve: any, reject: any) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
   })
 
   it('reads data from 3 pages and 1 missing page', (done: any) => {
@@ -148,15 +153,17 @@ describe('PagedHttpGetReader', () => {
       }
       return false
     })
-    new BPromise((resolve: any, reject: any) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
   })
 
   it('reads data from 4 pages via transform', (done: any) => {
@@ -186,15 +193,17 @@ describe('PagedHttpGetReader', () => {
     }, {
       transformFactory: () => new PassThrough()
     })
-    new BPromise((resolve: any, reject: any) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
   })
 
   it('reads data from 3 pages and 1 missing page via transform', (done: any) => {
@@ -224,15 +233,17 @@ describe('PagedHttpGetReader', () => {
     }, {
       transformFactory: () => new PassThrough()
     })
-    new BPromise((resolve: any, reject: any) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
   })
 
   it('handles error', (done: any) => {
@@ -244,12 +255,14 @@ describe('PagedHttpGetReader', () => {
     const reader = new PagedHttpGetReader('http://dataplug.io/no-data', (page: any) => false, {
       abortOnError: true
     })
-    new BPromise((resolve: any) => {
-      reader
-        .on('error', resolve)
-    })
-      .should.eventually.be.match(/No match for request/)
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any) => {
+        reader
+          .on('error', resolve)
+      })
+    )
+      .resolves.toMatch(/No match for request/)
+      .then(done)
     reader.resume()
   })
 
@@ -278,12 +291,14 @@ describe('PagedHttpGetReader', () => {
     }, {
       abortOnError: true
     })
-    new BPromise((resolve: any) => {
-      reader
-        .on('error', resolve)
-    })
-      .should.eventually.be.match(/No match for request/)
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any) => {
+        reader
+          .on('error', resolve)
+      })
+    )
+      .resolves.toMatch(/No match for request/)
+      .then(done)
     reader.resume()
   })
 
@@ -297,12 +312,14 @@ describe('PagedHttpGetReader', () => {
       transformFactory: () => new PassThrough(),
       abortOnError: true
     })
-    new BPromise((resolve: any) => {
-      reader
-        .on('error', resolve)
-    })
-      .should.eventually.be.match(/No match for request/)
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any) => {
+        reader
+          .on('error', resolve)
+      })
+    )
+      .resolves.toMatch(/No match for request/)
+      .then(done)
     reader.resume()
   })
 
@@ -320,12 +337,14 @@ describe('PagedHttpGetReader', () => {
       }),
       abortOnError: true
     })
-    new BPromise((resolve: any) => {
-      reader
-        .on('error', resolve)
-    })
-      .should.eventually.be.match(/expected/)
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any) => {
+        reader
+          .on('error', resolve)
+      })
+    )
+      .resolves.toMatch(/expected/)
+      .then(done)
     reader.resume()
   })
 
@@ -355,12 +374,15 @@ describe('PagedHttpGetReader', () => {
       transformFactory: () => new PassThrough(),
       abortOnError: true
     })
-    new BPromise((resolve) => {
-      reader
-        .on('error', resolve)
-    })
-      .should.eventually.be.match(/No match for request/)
-      .and.notify(done)
+    expect(
+      new BPromise((resolve) => {
+        reader
+          .on('error', resolve)
+      })
+
+    )
+      .resolves.toMatch(/No match for request/)
+      .then(done)
     reader.resume()
   })
 
@@ -408,15 +430,17 @@ describe('PagedHttpGetReader', () => {
         return true
       }
     })
-    new BPromise((resolve: any, reject: any) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
     reader.resume()
   })
 })

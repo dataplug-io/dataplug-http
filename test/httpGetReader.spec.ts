@@ -1,16 +1,11 @@
 /* eslint-env node, mocha */
+import 'ts-jest'
+
 import nock from 'nock'
 import { PassThrough, Transform } from 'stream'
-import logger from 'winston'
 import { HttpGetReader } from '../lib'
 
-require('chai')
-  .use(require('chai-as-promised'))
-  .should()
-
 const BPromise = require('bluebird')
-
-logger.clear()
 
 describe('HttpGetReader', () => {
   it('reads no data via HTTP with empty response', (done: any) => {
@@ -20,15 +15,17 @@ describe('HttpGetReader', () => {
       .reply(200)
 
     const reader = new HttpGetReader('http://dataplug.io/data')
-    new BPromise((resolve: any, reject: any) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk: any) => { data += chunk })
-    })
-      .should.eventually.be.equal('')
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk: any) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('')
+      .then(done)
   })
 
   it('reads no data when server replies 404 HTTP', (done: any) => {
@@ -38,15 +35,17 @@ describe('HttpGetReader', () => {
       .reply(404)
 
     const reader = new HttpGetReader('http://dataplug.io/data')
-    new BPromise((resolve: any, reject: any) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk: any) => { data += chunk })
-    })
-      .should.eventually.be.equal('')
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk: any) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('')
+      .then(done)
   })
 
   it('reads data', (done: any) => {
@@ -56,15 +55,17 @@ describe('HttpGetReader', () => {
       .reply(200, 'data')
 
     const reader = new HttpGetReader('http://dataplug.io/data')
-    new BPromise((resolve: any, reject: any) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk: any) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk: any) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
   })
 
   it('reads data via transform', (done: any) => {
@@ -77,17 +78,19 @@ describe('HttpGetReader', () => {
     const reader = new HttpGetReader('http://dataplug.io/data', {
       transform
     })
-    new BPromise((resolve: any, reject: any) => {
-      let data = ''
-      reader
-        .on('error', reject)
-      transform
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk: any) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('error', reject)
+        transform
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk: any) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
     reader.resume()
   })
 
@@ -100,12 +103,14 @@ describe('HttpGetReader', () => {
     const reader = new HttpGetReader('http://dataplug.io/no-data', {
       abortOnError: true
     })
-    new BPromise((resolve: any) => {
-      reader
-        .on('error', resolve)
-    })
-      .should.eventually.be.match(/No match for request/)
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any) => {
+        reader
+          .on('error', resolve)
+      })
+    )
+      .resolves.toMatch(/No match for request/)
+      .then(done)
     reader.resume()
   })
 
@@ -118,15 +123,17 @@ describe('HttpGetReader', () => {
     const reader = new HttpGetReader('http://dataplug.io/no-data', {
       abortOnError: false
     })
-    new BPromise((resolve: any, reject: any) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk: any) => { data += chunk })
-    })
-      .should.eventually.be.equal('')
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk: any) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('')
+      .then(done)
     reader.resume()
   })
 
@@ -141,12 +148,14 @@ describe('HttpGetReader', () => {
       transform,
       abortOnError: true
     })
-    new BPromise((resolve: any) => {
-      reader
-        .on('error', resolve)
-    })
-      .should.eventually.be.match(/No match for request/)
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any) => {
+        reader
+          .on('error', resolve)
+      })
+    )
+      .resolves.toMatch(/No match for request/)
+      .then(done)
     reader.resume()
   })
 
@@ -165,12 +174,14 @@ describe('HttpGetReader', () => {
       transform,
       abortOnError: true
     })
-    new BPromise((resolve: any) => {
-      reader
-        .on('error', resolve)
-    })
-      .should.eventually.be.match(/expected/)
-      .and.notify(done)
+    expect(
+      new BPromise((resolve: any) => {
+        reader
+          .on('error', resolve)
+      })
+    )
+      .resolves.toMatch(/expected/)
+      .then(done)
     reader.resume()
   })
 })
