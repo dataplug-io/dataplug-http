@@ -1,91 +1,96 @@
-/* eslint-env node, mocha */
-require('chai')
-  .use(require('chai-as-promised'))
-  .should()
-const nock = require('nock')
-const { PassThrough, Transform } = require('stream')
-const Promise = require('bluebird')
-const logger = require('winston')
-const { PagedHttpGetReader } = require('../lib')
+// Copyright (C) 2017-2019 Brainbean Apps OU (https://brainbeanapps.com).
+// License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-logger.clear()
+import 'ts-jest'
+import nock from 'nock'
+import { Promise as BluebirdPromise } from 'bluebird'
+import { PassThrough, Transform } from 'stream'
+import { PagedHttpGetReader } from '../src'
 
 describe('PagedHttpGetReader', () => {
-  it('reads no data via HTTP with empty response', (done) => {
+  it('reads no data via HTTP with empty response', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
       .reply(200)
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page) => false)
-    new Promise((resolve, reject) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('')
-      .and.notify(done)
+    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false)
+    expect(
+      new BluebirdPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('')
+      .then(done)
   })
 
-  it('reads no data when server replies 404 HTTP', (done) => {
+  it('reads no data when server replies 404 HTTP', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
       .reply(404)
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page) => false)
-    new Promise((resolve, reject) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('')
-      .and.notify(done)
+    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false)
+    expect(
+      new BluebirdPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk: any) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('')
+      .then(done)
   })
 
-  it('reads data', (done) => {
+  it('reads data', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
       .reply(200, 'data')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page) => false)
-    new Promise((resolve, reject) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false)
+    expect(
+      new BluebirdPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
   })
 
-  it('reads data via transform', (done) => {
+  it('reads data via transform', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
       .reply(200, 'data')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page) => false, {
+    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false, {
       transformFactory: () => new PassThrough()
     })
-    new Promise((resolve, reject) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    expect(
+      new BluebirdPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
   })
 
-  it('reads data from 4 pages', (done) => {
+  it('reads data from 4 pages', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data/1')
@@ -97,7 +102,7 @@ describe('PagedHttpGetReader', () => {
       .get('/data/4')
       .reply(200, 'a')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page) => {
+    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page: any) => {
       if (page && page.url === 'http://dataplug.io/data/1') {
         page.url = 'http://dataplug.io/data/2'
         return true
@@ -110,18 +115,20 @@ describe('PagedHttpGetReader', () => {
       }
       return false
     })
-    new Promise((resolve, reject) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    expect(
+      new BluebirdPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
   })
 
-  it('reads data from 3 pages and 1 missing page', (done) => {
+  it('reads data from 3 pages and 1 missing page', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data/1')
@@ -133,7 +140,7 @@ describe('PagedHttpGetReader', () => {
       .get('/data/4')
       .reply(200, 'ta')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page) => {
+    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page: any) => {
       if (page && page.url === 'http://dataplug.io/data/1') {
         page.url = 'http://dataplug.io/data/2'
         return true
@@ -146,18 +153,20 @@ describe('PagedHttpGetReader', () => {
       }
       return false
     })
-    new Promise((resolve, reject) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    expect(
+      new BluebirdPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
   })
 
-  it('reads data from 4 pages via transform', (done) => {
+  it('reads data from 4 pages via transform', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data/1')
@@ -169,7 +178,7 @@ describe('PagedHttpGetReader', () => {
       .get('/data/4')
       .reply(200, 'a')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page) => {
+    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page: any) => {
       if (page && page.url === 'http://dataplug.io/data/1') {
         page.url = 'http://dataplug.io/data/2'
         return true
@@ -184,18 +193,20 @@ describe('PagedHttpGetReader', () => {
     }, {
       transformFactory: () => new PassThrough()
     })
-    new Promise((resolve, reject) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    expect(
+      new BluebirdPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
   })
 
-  it('reads data from 3 pages and 1 missing page via transform', (done) => {
+  it('reads data from 3 pages and 1 missing page via transform', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data/1')
@@ -207,7 +218,7 @@ describe('PagedHttpGetReader', () => {
       .get('/data/4')
       .reply(200, 'ta')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page) => {
+    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page: any) => {
       if (page && page.url === 'http://dataplug.io/data/1') {
         page.url = 'http://dataplug.io/data/2'
         return true
@@ -222,36 +233,41 @@ describe('PagedHttpGetReader', () => {
     }, {
       transformFactory: () => new PassThrough()
     })
-    new Promise((resolve, reject) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    expect(
+      new BluebirdPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
   })
 
-  it('handles error', (done) => {
+  it('handles error', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
       .reply(200, 'data')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/no-data', (page) => false, {
+    const reader = new PagedHttpGetReader('http://dataplug.io/no-data', (page: any) => false, {
       abortOnError: true
     })
-    new Promise((resolve) => {
-      reader
-        .on('error', resolve)
-    })
-      .should.eventually.be.match(/No match for request/)
-      .and.notify(done)
+    expect(
+      new BluebirdPromise((resolve: any, reject: any) => {
+        reader
+          .on('error', reject)
+          .on('end', resolve)
+      })
+    )
+      .rejects.toThrow(/No match for request/)
+      .then(done)
     reader.resume()
   })
 
-  it('handles error with 4 pages', (done) => {
+  it('handles error with 4 pages', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data/1')
@@ -261,7 +277,7 @@ describe('PagedHttpGetReader', () => {
       .get('/data/4')
       .reply(200, 'ta')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page) => {
+    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page: any) => {
       if (page && page.url === 'http://dataplug.io/data/1') {
         page.url = 'http://dataplug.io/data/2'
         return true
@@ -276,41 +292,46 @@ describe('PagedHttpGetReader', () => {
     }, {
       abortOnError: true
     })
-    new Promise((resolve) => {
-      reader
-        .on('error', resolve)
-    })
-      .should.eventually.be.match(/No match for request/)
-      .and.notify(done)
+    expect(
+      new BluebirdPromise((resolve: any, reject: any) => {
+        reader
+          .on('error', reject)
+          .on('end', resolve)
+      })
+    )
+      .rejects.toThrow(/No match for request/)
+      .then(done)
     reader.resume()
   })
 
-  it('handles error via transform', (done) => {
+  it('handles error via transform', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
       .reply(200, 'data')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/no-data/transform', (page) => false, {
+    const reader = new PagedHttpGetReader('http://dataplug.io/no-data/transform', (page: any) => false, {
       transformFactory: () => new PassThrough(),
       abortOnError: true
     })
-    new Promise((resolve) => {
-      reader
-        .on('error', resolve)
-    })
-      .should.eventually.be.match(/No match for request/)
-      .and.notify(done)
+    expect(
+      new BluebirdPromise((resolve: any, reject: any) => {
+        reader
+          .on('error', reject)
+      })
+    )
+      .rejects.toThrow(/No match for request/)
+      .then(done)
     reader.resume()
   })
 
-  it('handles error in transform', (done) => {
+  it('handles error in transform', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data')
       .reply(200, 'data')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page) => false, {
+    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false, {
       transformFactory: () => new Transform({
         transform: (chunk, encoding, callback) => {
           callback(new Error('expected'), null)
@@ -318,16 +339,19 @@ describe('PagedHttpGetReader', () => {
       }),
       abortOnError: true
     })
-    new Promise((resolve) => {
-      reader
-        .on('error', resolve)
-    })
-      .should.eventually.be.match(/expected/)
-      .and.notify(done)
+    expect(
+      new BluebirdPromise((resolve: any, reject: any) => {
+        reader
+          .on('error', reject)
+          .on('end', resolve)
+      })
+    )
+      .rejects.toThrow(/expected/)
+      .then(done)
     reader.resume()
   })
 
-  it('handles error with 4 pages via transform', (done) => {
+  it('handles error with 4 pages via transform', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data/1')
@@ -337,7 +361,7 @@ describe('PagedHttpGetReader', () => {
       .get('/data/4')
       .reply(200, 'ta')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page) => {
+    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page: any) => {
       if (page && page.url === 'http://dataplug.io/data/1') {
         page.url = 'http://dataplug.io/data/2'
         return true
@@ -353,16 +377,19 @@ describe('PagedHttpGetReader', () => {
       transformFactory: () => new PassThrough(),
       abortOnError: true
     })
-    new Promise((resolve) => {
-      reader
-        .on('error', resolve)
-    })
-      .should.eventually.be.match(/No match for request/)
-      .and.notify(done)
+    expect(
+      new BluebirdPromise((resolve: any, reject: any) => {
+        reader
+          .on('error', reject)
+          .on('end', resolve)
+      })
+    )
+      .rejects.toThrow(/No match for request/)
+      .then(done)
     reader.resume()
   })
 
-  it('handles retry', (done) => {
+  it('handles retry', done => {
     nock.cleanAll()
     nock('http://dataplug.io')
       .get('/data/1')
@@ -374,7 +401,7 @@ describe('PagedHttpGetReader', () => {
       .get('/data/4')
       .reply(200, 'a')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page) => {
+    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page: any) => {
       if (page && page.url === 'http://dataplug.io/data/1') {
         page.url = 'http://dataplug.io/data/2'
         return true
@@ -388,7 +415,7 @@ describe('PagedHttpGetReader', () => {
       return false
     }, {
       transformFactory: () => new PassThrough(),
-      responseHandler: (response) => {
+      responseHandler: (response: any) => {
         if (response.statusCode === 429) {
           nock.cleanAll()
           nock('http://dataplug.io')
@@ -406,15 +433,17 @@ describe('PagedHttpGetReader', () => {
         return true
       }
     })
-    new Promise((resolve, reject) => {
-      let data = ''
-      reader
-        .on('end', () => resolve(data))
-        .on('error', reject)
-        .on('data', (chunk) => { data += chunk })
-    })
-      .should.eventually.be.equal('data')
-      .and.notify(done)
+    expect(
+      new BluebirdPromise((resolve: any, reject: any) => {
+        let data = ''
+        reader
+          .on('end', () => resolve(data))
+          .on('error', reject)
+          .on('data', (chunk) => { data += chunk })
+      })
+    )
+      .resolves.toEqual('data')
+      .then(done)
     reader.resume()
   })
 })
