@@ -7,13 +7,12 @@ import Promise from 'bluebird'
 import request from 'request'
 import logger from 'winston'
 import { URL } from 'url'
-import HttpGetReader from'./httpGetReader'
+import HttpGetReader from './httpGetReader'
 
 /**
  * Reads data from HTTP service URL that supports pagination, optionally altering the data using specified Transform
  */
 export default class PagedHttpGetReader extends Readable {
-
   private url: string | URL
   private nextPage: any
   private options: any
@@ -40,18 +39,27 @@ export default class PagedHttpGetReader extends Readable {
    * @param {PagedHttpGetReader~NextPageFunctor} nextPage Next-page functor
    * @param {PagedHttpGetReader~Options} [options=] Options
    */
-  constructor (url: string | URL, nextPage: any, options: any = undefined) {
-    options = Object.assign({}, {
-      transformFactory: undefined,
-      query: undefined,
-      headers: undefined,
-      responseHandler: HttpGetReader.defaultResponseHandler,
-      abortOnError: false
-    }, options)
+  constructor(url: string | URL, nextPage: any, options: any = undefined) {
+    options = Object.assign(
+      {},
+      {
+        transformFactory: undefined,
+        query: undefined,
+        headers: undefined,
+        responseHandler: HttpGetReader.defaultResponseHandler,
+        abortOnError: false,
+      },
+      options,
+    )
 
-    const transform = options.transformFactory ? options.transformFactory() : null
+    const transform = options.transformFactory
+      ? options.transformFactory()
+      : null
     super({
-      objectMode: transform && transform._readableState ? transform._readableState.objectMode : false
+      objectMode:
+        transform && transform._readableState
+          ? transform._readableState.objectMode
+          : false,
     })
 
     this.url = url
@@ -72,7 +80,8 @@ export default class PagedHttpGetReader extends Readable {
     this.onTransformCloseHandler = (...args) => this.onTransformClose(...args)
     this.onTransformEndHandler = (...args) => this.onTransformEnd(...args)
     this.onTransformDataHandler = (...args) => this.onTransformData(...args)
-    this.onTransformCompleteHandler = (...args) => this.onTransformComplete(...args)
+    this.onTransformCompleteHandler = (...args) =>
+      this.onTransformComplete(...args)
 
     this.once('read', () => {
       this._safeStartRequest()
@@ -83,14 +92,14 @@ export default class PagedHttpGetReader extends Readable {
    * https://nodejs.org/api/stream.html#stream_readable_read_size_1
    * @override
    */
-  _read (size: any) {
+  _read(size: any) {
     this.emit('read')
   }
 
   /**
    * https://nodejs.org/api/stream.html#stream_readable_destroy_err_callback
    */
-  _destroy (err: Error, callback: (err: Error) => void) {
+  _destroy(err: Error, callback: (err: Error) => void) {
     // Detach from current stream
     if (this.request) {
       const capturedRequest = this.request
@@ -104,12 +113,12 @@ export default class PagedHttpGetReader extends Readable {
   /**
    * Starts the request
    */
-  _startRequest (): void {
+  _startRequest(): void {
     const options = {
       url: this.url,
       qs: this.query || {},
       headers: this.headers || {},
-      gzip: true
+      gzip: true,
     }
 
     logger.log('verbose', `Starting paged HTTP GET request to ${options.url}`)
@@ -126,11 +135,15 @@ export default class PagedHttpGetReader extends Readable {
   /**
    * Safely starts the request
    */
-  _safeStartRequest (): void {
+  _safeStartRequest(): void {
     try {
       this._startRequest()
     } catch (error) {
-      logger.log('error', `Error while starting HTTP GET request to '${this.url}'`, error)
+      logger.log(
+        'error',
+        `Error while starting HTTP GET request to '${this.url}'`,
+        error,
+      )
       this.emit('error', error)
 
       this.detachFromStreams()
@@ -141,8 +154,12 @@ export default class PagedHttpGetReader extends Readable {
   /**
    * Handles request error
    */
-  private onRequestError (error: Error): void {
-    logger.log('error', `Error while making paged HTTP GET request to '${this.url}'`, error)
+  private onRequestError(error: Error): void {
+    logger.log(
+      'error',
+      `Error while making paged HTTP GET request to '${this.url}'`,
+      error,
+    )
 
     if (this.options.abortOnError) {
       this.emit('error', error)
@@ -158,7 +175,7 @@ export default class PagedHttpGetReader extends Readable {
   /**
    * Handles request close
    */
-  private onRequestClose (): void {
+  private onRequestClose(): void {
     if (!this.transform) {
       this.proceedToNextPage(null)
     } else {
@@ -169,7 +186,7 @@ export default class PagedHttpGetReader extends Readable {
   /**
    * Handles request end
    */
-  private onRequestEnd (): void {
+  private onRequestEnd(): void {
     logger.log('verbose', `Paged HTTP GET request to ${this.url} complete`)
 
     if (!this.transform) {
@@ -182,8 +199,11 @@ export default class PagedHttpGetReader extends Readable {
   /**
    * Handles request data
    */
-  private onRequestData (chunk: any): void {
-    logger.log('debug', `Received data while making paged HTTP GET request to ${this.url}`)
+  private onRequestData(chunk: any): void {
+    logger.log(
+      'debug',
+      `Received data while making paged HTTP GET request to ${this.url}`,
+    )
     logger.log('silly', 'Chunk', _.toString(chunk))
 
     if (!this.transform) {
@@ -194,8 +214,11 @@ export default class PagedHttpGetReader extends Readable {
   /**
    * Handles request response
    */
-  private onRequestResponse (response: any): void {
-    logger.log('debug', `Received response while making paged HTTP GET request to ${this.url}`)
+  private onRequestResponse(response: any): void {
+    logger.log(
+      'debug',
+      `Received response while making paged HTTP GET request to ${this.url}`,
+    )
     logger.log('debug', 'Response HTTP version', response.httpVersion)
     logger.log('debug', 'Response headers', response.headers)
     logger.log('debug', 'Response status code', response.statusCode)
@@ -205,7 +228,11 @@ export default class PagedHttpGetReader extends Readable {
     try {
       shouldProcessData = this.options.responseHandler(response, this.request)
     } catch (error) {
-      logger.log('error', `Error while handling response to HTTP GET request to '${this.url}'`, error)
+      logger.log(
+        'error',
+        `Error while handling response to HTTP GET request to '${this.url}'`,
+        error,
+      )
 
       this.emit('error', error)
       this.detachFromStreams()
@@ -214,7 +241,10 @@ export default class PagedHttpGetReader extends Readable {
     }
 
     if (_.isBoolean(shouldProcessData) && shouldProcessData) {
-      logger.log('debug', `Processing response data from paged HTTP GET request to ${this.url}`)
+      logger.log(
+        'debug',
+        `Processing response data from paged HTTP GET request to ${this.url}`,
+      )
       this.request
         .on('data', this.onRequestDataHandler)
         .on('close', this.onRequestCloseHandler)
@@ -227,14 +257,16 @@ export default class PagedHttpGetReader extends Readable {
           .on('close', this.onTransformCloseHandler)
           .on('end', this.onTransformEndHandler)
           .on('complete', this.onTransformCompleteHandler)
-        this.request
-          .pipe(this.transform)
+        this.request.pipe(this.transform)
       }
     } else {
       this.detachFromStreams()
-      logger.log('debug', `Going to retry paged HTTP GET request to ${this.url}`)
+      logger.log(
+        'debug',
+        `Going to retry paged HTTP GET request to ${this.url}`,
+      )
       Promise.resolve(shouldProcessData)
-        .then((shouldProcessData) => {
+        .then(shouldProcessData => {
           if (shouldProcessData) {
             throw new Error('responseHandler should not return promised true')
           }
@@ -242,8 +274,14 @@ export default class PagedHttpGetReader extends Readable {
           logger.log('debug', `Retrying paged HTTP GET request to ${this.url}`)
           this._startRequest()
         })
-        .catch((error) => {
-          logger.log('error', `Error while waiting for retrying of paged HTTP GET request to '${this.url}'`, error)
+        .catch(error => {
+          logger.log(
+            'error',
+            `Error while waiting for retrying of paged HTTP GET request to '${
+              this.url
+            }'`,
+            error,
+          )
 
           this.emit('error', error)
           this.detachFromStreams()
@@ -255,8 +293,14 @@ export default class PagedHttpGetReader extends Readable {
   /**
    * Handles transform error
    */
-  private onTransformError (error: Error): void {
-    logger.log('error', `Error while transforming data from paged HTTP GET request to '${this.url}'`, error)
+  private onTransformError(error: Error): void {
+    logger.log(
+      'error',
+      `Error while transforming data from paged HTTP GET request to '${
+        this.url
+      }'`,
+      error,
+    )
 
     if (this.options.abortOnError) {
       this.emit('error', error)
@@ -268,15 +312,18 @@ export default class PagedHttpGetReader extends Readable {
   /**
    * Handles transform close
    */
-  private onTransformClose (): void {
+  private onTransformClose(): void {
     this.transform.end()
   }
 
   /**
    * Handles transform end
    */
-  private onTransformEnd (): void {
-    logger.log('verbose', `Transformation of data from paged HTTP GET request to ${this.url} ended`)
+  private onTransformEnd(): void {
+    logger.log(
+      'verbose',
+      `Transformation of data from paged HTTP GET request to ${this.url} ended`,
+    )
 
     this.proceedToNextPage(null)
   }
@@ -284,8 +331,11 @@ export default class PagedHttpGetReader extends Readable {
   /**
    * Handles transform data
    */
-  private onTransformData (chunk: any): void {
-    logger.log('debug', `Transformed data from paged HTTP GET request to ${this.url}`)
+  private onTransformData(chunk: any): void {
+    logger.log(
+      'debug',
+      `Transformed data from paged HTTP GET request to ${this.url}`,
+    )
     logger.log('silly', 'Chunk', chunk)
 
     this.push(chunk)
@@ -294,8 +344,13 @@ export default class PagedHttpGetReader extends Readable {
   /**
    * Handles complete data from transform
    */
-  private onTransformComplete (data: any): void {
-    logger.log('verbose', `Transformation of data from paged HTTP GET request to ${this.url} is complete`)
+  private onTransformComplete(data: any): void {
+    logger.log(
+      'verbose',
+      `Transformation of data from paged HTTP GET request to ${
+        this.url
+      } is complete`,
+    )
     logger.log('silly', 'Data', data)
 
     this.proceedToNextPage(data)
@@ -304,8 +359,11 @@ export default class PagedHttpGetReader extends Readable {
   /**
    * Detach from streams
    */
-  private detachFromStreams (): void {
-    logger.log('verbose', `Detaching from streams of paged HTTP GET request to ${this.url}`)
+  private detachFromStreams(): void {
+    logger.log(
+      'verbose',
+      `Detaching from streams of paged HTTP GET request to ${this.url}`,
+    )
 
     if (this.request) {
       this.request.removeListener('data', this.onRequestDataHandler)
@@ -331,35 +389,52 @@ export default class PagedHttpGetReader extends Readable {
    *
    * @param {} data Data from current page
    */
-  private proceedToNextPage (data: any): void {
+  private proceedToNextPage(data: any): void {
     this.detachFromStreams()
 
-    logger.log('verbose', `Checking existence of next page of paged HTTP GET request to ${this.url}`)
+    logger.log(
+      'verbose',
+      `Checking existence of next page of paged HTTP GET request to ${
+        this.url
+      }`,
+    )
 
     let page = {
       url: this.url,
       query: this.query,
-      headers: this.headers
+      headers: this.headers,
     }
     Promise.try(() => this.nextPage(page, data))
-      .then((hasNextPage) => {
+      .then(hasNextPage => {
         if (!hasNextPage) {
-          logger.log('verbose', `No page to proceed to of paged HTTP GET request to ${this.url}`)
+          logger.log(
+            'verbose',
+            `No page to proceed to of paged HTTP GET request to ${this.url}`,
+          )
 
           this.push(null)
           return
         }
 
-        logger.log('verbose', `Proceeding to next page of paged HTTP GET request to ${this.url}`)
+        logger.log(
+          'verbose',
+          `Proceeding to next page of paged HTTP GET request to ${this.url}`,
+        )
 
         this.url = page.url
         this.query = page.query
         this.headers = page.headers
         this._startRequest()
       })
-    .catch((error) => {
-      logger.log('error', `Error in PagedHttpGetReader while checking existence of next page of paged HTTP GET request to ${this.url}`, error)
-      this.push(null)
-    })
+      .catch(error => {
+        logger.log(
+          'error',
+          `Error in PagedHttpGetReader while checking existence of next page of paged HTTP GET request to ${
+            this.url
+          }`,
+          error,
+        )
+        this.push(null)
+      })
   }
 }

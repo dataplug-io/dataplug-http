@@ -14,15 +14,20 @@ describe('PagedHttpGetReader', () => {
       .get('/data')
       .reply(200)
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false)
+    const reader = new PagedHttpGetReader(
+      'http://dataplug.io/data',
+      (page: any) => false,
+    )
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve, reject) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
           .on('error', reject)
-          .on('data', (chunk) => { data += chunk })
-      })
+          .on('data', chunk => {
+            data += chunk
+          })
+      }),
     )
       .resolves.toEqual('')
       .then(done)
@@ -34,15 +39,20 @@ describe('PagedHttpGetReader', () => {
       .get('/data')
       .reply(404)
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false)
+    const reader = new PagedHttpGetReader(
+      'http://dataplug.io/data',
+      (page: any) => false,
+    )
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve, reject) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
           .on('error', reject)
-          .on('data', (chunk: any) => { data += chunk })
-      })
+          .on('data', (chunk: any) => {
+            data += chunk
+          })
+      }),
     )
       .resolves.toEqual('')
       .then(done)
@@ -54,15 +64,20 @@ describe('PagedHttpGetReader', () => {
       .get('/data')
       .reply(200, 'data')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false)
+    const reader = new PagedHttpGetReader(
+      'http://dataplug.io/data',
+      (page: any) => false,
+    )
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve, reject) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
           .on('error', reject)
-          .on('data', (chunk) => { data += chunk })
-      })
+          .on('data', chunk => {
+            data += chunk
+          })
+      }),
     )
       .resolves.toEqual('data')
       .then(done)
@@ -74,17 +89,23 @@ describe('PagedHttpGetReader', () => {
       .get('/data')
       .reply(200, 'data')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false, {
-      transformFactory: () => new PassThrough()
-    })
+    const reader = new PagedHttpGetReader(
+      'http://dataplug.io/data',
+      (page: any) => false,
+      {
+        transformFactory: () => new PassThrough(),
+      },
+    )
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve, reject) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
           .on('error', reject)
-          .on('data', (chunk) => { data += chunk })
-      })
+          .on('data', chunk => {
+            data += chunk
+          })
+      }),
     )
       .resolves.toEqual('data')
       .then(done)
@@ -102,27 +123,32 @@ describe('PagedHttpGetReader', () => {
       .get('/data/4')
       .reply(200, 'a')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page: any) => {
-      if (page && page.url === 'http://dataplug.io/data/1') {
-        page.url = 'http://dataplug.io/data/2'
-        return true
-      } else if (page && page.url === 'http://dataplug.io/data/2') {
-        page.url = 'http://dataplug.io/data/3'
-        return true
-      } else if (page && page.url === 'http://dataplug.io/data/3') {
-        page.url = 'http://dataplug.io/data/4'
-        return true
-      }
-      return false
-    })
+    const reader = new PagedHttpGetReader(
+      'http://dataplug.io/data/1',
+      (page: any) => {
+        if (page && page.url === 'http://dataplug.io/data/1') {
+          page.url = 'http://dataplug.io/data/2'
+          return true
+        } else if (page && page.url === 'http://dataplug.io/data/2') {
+          page.url = 'http://dataplug.io/data/3'
+          return true
+        } else if (page && page.url === 'http://dataplug.io/data/3') {
+          page.url = 'http://dataplug.io/data/4'
+          return true
+        }
+        return false
+      },
+    )
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve, reject) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
           .on('error', reject)
-          .on('data', (chunk) => { data += chunk })
-      })
+          .on('data', chunk => {
+            data += chunk
+          })
+      }),
     )
       .resolves.toEqual('data')
       .then(done)
@@ -140,27 +166,32 @@ describe('PagedHttpGetReader', () => {
       .get('/data/4')
       .reply(200, 'ta')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page: any) => {
-      if (page && page.url === 'http://dataplug.io/data/1') {
-        page.url = 'http://dataplug.io/data/2'
-        return true
-      } else if (page && page.url === 'http://dataplug.io/data/2') {
-        page.url = 'http://dataplug.io/data/3'
-        return true
-      } else if (page && page.url === 'http://dataplug.io/data/3') {
-        page.url = 'http://dataplug.io/data/4'
-        return true
-      }
-      return false
-    })
+    const reader = new PagedHttpGetReader(
+      'http://dataplug.io/data/1',
+      (page: any) => {
+        if (page && page.url === 'http://dataplug.io/data/1') {
+          page.url = 'http://dataplug.io/data/2'
+          return true
+        } else if (page && page.url === 'http://dataplug.io/data/2') {
+          page.url = 'http://dataplug.io/data/3'
+          return true
+        } else if (page && page.url === 'http://dataplug.io/data/3') {
+          page.url = 'http://dataplug.io/data/4'
+          return true
+        }
+        return false
+      },
+    )
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve, reject) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
           .on('error', reject)
-          .on('data', (chunk) => { data += chunk })
-      })
+          .on('data', chunk => {
+            data += chunk
+          })
+      }),
     )
       .resolves.toEqual('data')
       .then(done)
@@ -178,29 +209,35 @@ describe('PagedHttpGetReader', () => {
       .get('/data/4')
       .reply(200, 'a')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page: any) => {
-      if (page && page.url === 'http://dataplug.io/data/1') {
-        page.url = 'http://dataplug.io/data/2'
-        return true
-      } else if (page && page.url === 'http://dataplug.io/data/2') {
-        page.url = 'http://dataplug.io/data/3'
-        return true
-      } else if (page && page.url === 'http://dataplug.io/data/3') {
-        page.url = 'http://dataplug.io/data/4'
-        return true
-      }
-      return false
-    }, {
-      transformFactory: () => new PassThrough()
-    })
+    const reader = new PagedHttpGetReader(
+      'http://dataplug.io/data/1',
+      (page: any) => {
+        if (page && page.url === 'http://dataplug.io/data/1') {
+          page.url = 'http://dataplug.io/data/2'
+          return true
+        } else if (page && page.url === 'http://dataplug.io/data/2') {
+          page.url = 'http://dataplug.io/data/3'
+          return true
+        } else if (page && page.url === 'http://dataplug.io/data/3') {
+          page.url = 'http://dataplug.io/data/4'
+          return true
+        }
+        return false
+      },
+      {
+        transformFactory: () => new PassThrough(),
+      },
+    )
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve, reject) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
           .on('error', reject)
-          .on('data', (chunk) => { data += chunk })
-      })
+          .on('data', chunk => {
+            data += chunk
+          })
+      }),
     )
       .resolves.toEqual('data')
       .then(done)
@@ -218,29 +255,35 @@ describe('PagedHttpGetReader', () => {
       .get('/data/4')
       .reply(200, 'ta')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page: any) => {
-      if (page && page.url === 'http://dataplug.io/data/1') {
-        page.url = 'http://dataplug.io/data/2'
-        return true
-      } else if (page && page.url === 'http://dataplug.io/data/2') {
-        page.url = 'http://dataplug.io/data/3'
-        return true
-      } else if (page && page.url === 'http://dataplug.io/data/3') {
-        page.url = 'http://dataplug.io/data/4'
-        return true
-      }
-      return false
-    }, {
-      transformFactory: () => new PassThrough()
-    })
+    const reader = new PagedHttpGetReader(
+      'http://dataplug.io/data/1',
+      (page: any) => {
+        if (page && page.url === 'http://dataplug.io/data/1') {
+          page.url = 'http://dataplug.io/data/2'
+          return true
+        } else if (page && page.url === 'http://dataplug.io/data/2') {
+          page.url = 'http://dataplug.io/data/3'
+          return true
+        } else if (page && page.url === 'http://dataplug.io/data/3') {
+          page.url = 'http://dataplug.io/data/4'
+          return true
+        }
+        return false
+      },
+      {
+        transformFactory: () => new PassThrough(),
+      },
+    )
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve, reject) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
           .on('error', reject)
-          .on('data', (chunk) => { data += chunk })
-      })
+          .on('data', chunk => {
+            data += chunk
+          })
+      }),
     )
       .resolves.toEqual('data')
       .then(done)
@@ -252,15 +295,17 @@ describe('PagedHttpGetReader', () => {
       .get('/data')
       .reply(200, 'data')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/no-data', (page: any) => false, {
-      abortOnError: true
-    })
+    const reader = new PagedHttpGetReader(
+      'http://dataplug.io/no-data',
+      (page: any) => false,
+      {
+        abortOnError: true,
+      },
+    )
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
-        reader
-          .on('error', reject)
-          .on('end', resolve)
-      })
+      new BluebirdPromise((resolve, reject) => {
+        reader.on('error', reject).on('end', resolve)
+      }),
     )
       .rejects.toThrow(/No match for request/)
       .then(done)
@@ -277,27 +322,29 @@ describe('PagedHttpGetReader', () => {
       .get('/data/4')
       .reply(200, 'ta')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page: any) => {
-      if (page && page.url === 'http://dataplug.io/data/1') {
-        page.url = 'http://dataplug.io/data/2'
-        return true
-      } else if (page && page.url === 'http://dataplug.io/data/2') {
-        page.url = 'http://dataplug.io/data/3'
-        return true
-      } else if (page && page.url === 'http://dataplug.io/data/3') {
-        page.url = 'http://dataplug.io/data/4'
-        return true
-      }
-      return false
-    }, {
-      abortOnError: true
-    })
+    const reader = new PagedHttpGetReader(
+      'http://dataplug.io/data/1',
+      (page: any) => {
+        if (page && page.url === 'http://dataplug.io/data/1') {
+          page.url = 'http://dataplug.io/data/2'
+          return true
+        } else if (page && page.url === 'http://dataplug.io/data/2') {
+          page.url = 'http://dataplug.io/data/3'
+          return true
+        } else if (page && page.url === 'http://dataplug.io/data/3') {
+          page.url = 'http://dataplug.io/data/4'
+          return true
+        }
+        return false
+      },
+      {
+        abortOnError: true,
+      },
+    )
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
-        reader
-          .on('error', reject)
-          .on('end', resolve)
-      })
+      new BluebirdPromise((resolve, reject) => {
+        reader.on('error', reject).on('end', resolve)
+      }),
     )
       .rejects.toThrow(/No match for request/)
       .then(done)
@@ -310,15 +357,18 @@ describe('PagedHttpGetReader', () => {
       .get('/data')
       .reply(200, 'data')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/no-data/transform', (page: any) => false, {
-      transformFactory: () => new PassThrough(),
-      abortOnError: true
-    })
+    const reader = new PagedHttpGetReader(
+      'http://dataplug.io/no-data/transform',
+      (page: any) => false,
+      {
+        transformFactory: () => new PassThrough(),
+        abortOnError: true,
+      },
+    )
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
-        reader
-          .on('error', reject)
-      })
+      new BluebirdPromise((resolve, reject) => {
+        reader.on('error', reject)
+      }),
     )
       .rejects.toThrow(/No match for request/)
       .then(done)
@@ -331,20 +381,23 @@ describe('PagedHttpGetReader', () => {
       .get('/data')
       .reply(200, 'data')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data', (page: any) => false, {
-      transformFactory: () => new Transform({
-        transform: (chunk, encoding, callback) => {
-          callback(new Error('expected'), null)
-        }
-      }),
-      abortOnError: true
-    })
+    const reader = new PagedHttpGetReader(
+      'http://dataplug.io/data',
+      (page: any) => false,
+      {
+        transformFactory: () =>
+          new Transform({
+            transform: (chunk, encoding, callback) => {
+              callback(new Error('expected'), null)
+            },
+          }),
+        abortOnError: true,
+      },
+    )
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
-        reader
-          .on('error', reject)
-          .on('end', resolve)
-      })
+      new BluebirdPromise((resolve, reject) => {
+        reader.on('error', reject).on('end', resolve)
+      }),
     )
       .rejects.toThrow(/expected/)
       .then(done)
@@ -361,28 +414,30 @@ describe('PagedHttpGetReader', () => {
       .get('/data/4')
       .reply(200, 'ta')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page: any) => {
-      if (page && page.url === 'http://dataplug.io/data/1') {
-        page.url = 'http://dataplug.io/data/2'
-        return true
-      } else if (page && page.url === 'http://dataplug.io/data/2') {
-        page.url = 'http://dataplug.io/data/3'
-        return true
-      } else if (page && page.url === 'http://dataplug.io/data/3') {
-        page.url = 'http://dataplug.io/data/4'
-        return true
-      }
-      return false
-    }, {
-      transformFactory: () => new PassThrough(),
-      abortOnError: true
-    })
+    const reader = new PagedHttpGetReader(
+      'http://dataplug.io/data/1',
+      (page: any) => {
+        if (page && page.url === 'http://dataplug.io/data/1') {
+          page.url = 'http://dataplug.io/data/2'
+          return true
+        } else if (page && page.url === 'http://dataplug.io/data/2') {
+          page.url = 'http://dataplug.io/data/3'
+          return true
+        } else if (page && page.url === 'http://dataplug.io/data/3') {
+          page.url = 'http://dataplug.io/data/4'
+          return true
+        }
+        return false
+      },
+      {
+        transformFactory: () => new PassThrough(),
+        abortOnError: true,
+      },
+    )
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
-        reader
-          .on('error', reject)
-          .on('end', resolve)
-      })
+      new BluebirdPromise((resolve, reject) => {
+        reader.on('error', reject).on('end', resolve)
+      }),
     )
       .rejects.toThrow(/No match for request/)
       .then(done)
@@ -401,46 +456,52 @@ describe('PagedHttpGetReader', () => {
       .get('/data/4')
       .reply(200, 'a')
 
-    const reader = new PagedHttpGetReader('http://dataplug.io/data/1', (page: any) => {
-      if (page && page.url === 'http://dataplug.io/data/1') {
-        page.url = 'http://dataplug.io/data/2'
-        return true
-      } else if (page && page.url === 'http://dataplug.io/data/2') {
-        page.url = 'http://dataplug.io/data/3'
-        return true
-      } else if (page && page.url === 'http://dataplug.io/data/3') {
-        page.url = 'http://dataplug.io/data/4'
-        return true
-      }
-      return false
-    }, {
-      transformFactory: () => new PassThrough(),
-      responseHandler: (response: any) => {
-        if (response.statusCode === 429) {
-          nock.cleanAll()
-          nock('http://dataplug.io')
-            .get('/data/1')
-            .reply(200, 'd')
-            .get('/data/2')
-            .reply(200, 'a')
-            .get('/data/3')
-            .reply(200, 't')
-            .get('/data/4')
-            .reply(200, 'a')
-          return false
+    const reader = new PagedHttpGetReader(
+      'http://dataplug.io/data/1',
+      (page: any) => {
+        if (page && page.url === 'http://dataplug.io/data/1') {
+          page.url = 'http://dataplug.io/data/2'
+          return true
+        } else if (page && page.url === 'http://dataplug.io/data/2') {
+          page.url = 'http://dataplug.io/data/3'
+          return true
+        } else if (page && page.url === 'http://dataplug.io/data/3') {
+          page.url = 'http://dataplug.io/data/4'
+          return true
         }
+        return false
+      },
+      {
+        transformFactory: () => new PassThrough(),
+        responseHandler: (response: any) => {
+          if (response.statusCode === 429) {
+            nock.cleanAll()
+            nock('http://dataplug.io')
+              .get('/data/1')
+              .reply(200, 'd')
+              .get('/data/2')
+              .reply(200, 'a')
+              .get('/data/3')
+              .reply(200, 't')
+              .get('/data/4')
+              .reply(200, 'a')
+            return false
+          }
 
-        return true
-      }
-    })
+          return true
+        },
+      },
+    )
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve, reject) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
           .on('error', reject)
-          .on('data', (chunk) => { data += chunk })
-      })
+          .on('data', chunk => {
+            data += chunk
+          })
+      }),
     )
       .resolves.toEqual('data')
       .then(done)

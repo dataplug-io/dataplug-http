@@ -11,7 +11,6 @@ import { URL } from 'url'
  * Reads data from HTTP service URL, optionally altering the data using specified Transform
  */
 export default class HttpGetReader extends Readable {
-
   private url: string | URL
   private options: any
   private request: any
@@ -31,20 +30,24 @@ export default class HttpGetReader extends Readable {
    * @param {string|URL} url HTTP service URL
    * @param {HttpGetReader~Options} [options=] Options
    */
-  constructor (url: string | URL, options: any = undefined) {
-
-    options = Object.assign({}, {
-      transform: undefined,
-      query: undefined,
-      headers: undefined,
-      responseHandler: HttpGetReader.defaultResponseHandler,
-      abortOnError: false
-    }, options)
+  constructor(url: string | URL, options: any = undefined) {
+    options = Object.assign(
+      {},
+      {
+        transform: undefined,
+        query: undefined,
+        headers: undefined,
+        responseHandler: HttpGetReader.defaultResponseHandler,
+        abortOnError: false,
+      },
+      options,
+    )
 
     super({
-      objectMode: options.transform && options.transform._readableState
-        ? options.transform._readableState.objectMode
-        : false
+      objectMode:
+        options.transform && options.transform._readableState
+          ? options.transform._readableState.objectMode
+          : false,
     })
 
     this.url = url
@@ -71,14 +74,14 @@ export default class HttpGetReader extends Readable {
    * https://nodejs.org/api/stream.html#stream_readable_read_size_1
    * @override
    */
-  _read (size: any): void {
+  _read(size: any): void {
     this.emit('read')
   }
 
   /**
    * https://nodejs.org/api/stream.html#stream_readable_destroy_err_callback
    */
-  _destroy (err: any, callback: (err: any) => void): void {
+  _destroy(err: any, callback: (err: any) => void): void {
     // Detach from current stream
     if (this.request) {
       const capturedRequest = this.request
@@ -92,12 +95,12 @@ export default class HttpGetReader extends Readable {
   /**
    * Starts the request
    */
-  _startRequest (): void {
+  _startRequest(): void {
     const options = {
       url: this.url,
       qs: this.options.query || {},
       headers: this.options.headers || {},
-      gzip: true
+      gzip: true,
     }
 
     logger.log('verbose', `Starting HTTP GET request to ${options.url}`)
@@ -114,11 +117,15 @@ export default class HttpGetReader extends Readable {
   /**
    * Safely starts the request
    */
-  _safeStartRequest (): void {
+  _safeStartRequest(): void {
     try {
       this._startRequest()
     } catch (error) {
-      logger.log('error', `Error while starting HTTP GET request to '${this.url}'`, error)
+      logger.log(
+        'error',
+        `Error while starting HTTP GET request to '${this.url}'`,
+        error,
+      )
       this.emit('error', error)
 
       this.detachFromStreams()
@@ -129,8 +136,12 @@ export default class HttpGetReader extends Readable {
   /**
    * Handles request error
    */
-  private onRequestError (error: any = undefined): void {
-    logger.log('error', `Error while making HTTP GET request to '${this.url}'`, error)
+  private onRequestError(error: any = undefined): void {
+    logger.log(
+      'error',
+      `Error while making HTTP GET request to '${this.url}'`,
+      error,
+    )
 
     if (this.options.abortOnError) {
       this.emit('error', error)
@@ -147,7 +158,7 @@ export default class HttpGetReader extends Readable {
   /**
    * Handles request close
    */
-  private onRequestClose (): void {
+  private onRequestClose(): void {
     if (!this.options.transform) {
       this.detachFromStreams()
       this.push(null)
@@ -159,7 +170,7 @@ export default class HttpGetReader extends Readable {
   /**
    * Handles request end
    */
-  private onRequestEnd (): void {
+  private onRequestEnd(): void {
     logger.log('verbose', `HTTP GET request to ${this.url} complete`)
 
     if (!this.options.transform) {
@@ -173,8 +184,11 @@ export default class HttpGetReader extends Readable {
   /**
    * Handles request data
    */
-  private onRequestData (chunk: any): void {
-    logger.log('debug', `Received data while making HTTP GET request to ${this.url}`)
+  private onRequestData(chunk: any): void {
+    logger.log(
+      'debug',
+      `Received data while making HTTP GET request to ${this.url}`,
+    )
     logger.log('silly', 'Chunk', _.toString(chunk))
 
     if (!this.options.transform) {
@@ -185,8 +199,11 @@ export default class HttpGetReader extends Readable {
   /**
    * Handles request response
    */
-  private onRequestResponse (response: any): void {
-    logger.log('debug', `Received response while making HTTP GET request to ${this.url}`)
+  private onRequestResponse(response: any): void {
+    logger.log(
+      'debug',
+      `Received response while making HTTP GET request to ${this.url}`,
+    )
     logger.log('debug', 'Response HTTP version', response.httpVersion)
     logger.log('debug', 'Response headers', response.headers)
     logger.log('debug', 'Response status code', response.statusCode)
@@ -196,7 +213,11 @@ export default class HttpGetReader extends Readable {
     try {
       shouldProcessData = this.options.responseHandler(response, this.request)
     } catch (error) {
-      logger.log('error', `Error while handling response to HTTP GET request to '${this.url}'`, error)
+      logger.log(
+        'error',
+        `Error while handling response to HTTP GET request to '${this.url}'`,
+        error,
+      )
 
       this.emit('error', error)
       this.detachFromStreams()
@@ -205,7 +226,11 @@ export default class HttpGetReader extends Readable {
     }
 
     if (shouldProcessData) {
-      logger.log('debug', `Processing response data from paged HTTP GET request to '${this.url}'`, this.url)
+      logger.log(
+        'debug',
+        `Processing response data from paged HTTP GET request to '${this.url}'`,
+        this.url,
+      )
       this.request
         .on('data', this.onRequestDataHandler)
         .on('close', this.onRequestCloseHandler)
@@ -216,14 +241,13 @@ export default class HttpGetReader extends Readable {
           .on('error', this.onTransformErrorHandler)
           .on('close', this.onTransformCloseHandler)
           .on('end', this.onTransformEndHandler)
-        this.request
-          .pipe(this.options.transform)
+        this.request.pipe(this.options.transform)
       }
     } else {
       this.detachFromStreams()
       logger.log('debug', `Going to retry HTTP GET request to ${this.url}`)
       Promise.resolve(shouldProcessData)
-        .then((shouldProcessData) => {
+        .then(shouldProcessData => {
           if (shouldProcessData) {
             throw new Error('responseHandler should not return promised true')
           }
@@ -231,8 +255,14 @@ export default class HttpGetReader extends Readable {
           logger.log('debug', `Retrying HTTP GET request to ${this.url}`)
           this._startRequest()
         })
-        .catch((error) => {
-          logger.log('error', `Error while waiting for retrying of HTTP GET request to '${this.url}'`, error)
+        .catch(error => {
+          logger.log(
+            'error',
+            `Error while waiting for retrying of HTTP GET request to '${
+              this.url
+            }'`,
+            error,
+          )
 
           this.emit('error', error)
           this.detachFromStreams()
@@ -244,8 +274,12 @@ export default class HttpGetReader extends Readable {
   /**
    * Handles transform error
    */
-  private onTransformError (error: Error): void {
-    logger.log('error', `Error while transforming data from HTTP GET request to '${this.url}'`, error)
+  private onTransformError(error: Error): void {
+    logger.log(
+      'error',
+      `Error while transforming data from HTTP GET request to '${this.url}'`,
+      error,
+    )
 
     if (this.options.abortOnError) {
       this.emit('error', error)
@@ -257,7 +291,7 @@ export default class HttpGetReader extends Readable {
   /**
    * Handles transform close
    */
-  private onTransformClose (): void {
+  private onTransformClose(): void {
     this.push(null)
     this.detachFromStreams()
   }
@@ -265,8 +299,11 @@ export default class HttpGetReader extends Readable {
   /**
    * Handles transform end
    */
-  private onTransformEnd (): void {
-    logger.log('verbose', `Transformation of data from HTTP GET request to ${this.url} ended`)
+  private onTransformEnd(): void {
+    logger.log(
+      'verbose',
+      `Transformation of data from HTTP GET request to ${this.url} ended`,
+    )
 
     this.push(null)
     this.detachFromStreams()
@@ -275,7 +312,7 @@ export default class HttpGetReader extends Readable {
   /**
    * Handles transform data
    */
-  private onTransformData (chunk: any): void {
+  private onTransformData(chunk: any): void {
     logger.log('debug', `Transformed data from HTTP GET request to ${this.url}`)
     logger.log('silly', 'Chunk', chunk)
 
@@ -285,8 +322,11 @@ export default class HttpGetReader extends Readable {
   /**
    * Detach from streams
    */
-  private detachFromStreams (): void {
-    logger.log('verbose', `Detaching from streams of HTTP GET request to ${this.url}`)
+  private detachFromStreams(): void {
+    logger.log(
+      'verbose',
+      `Detaching from streams of HTTP GET request to ${this.url}`,
+    )
 
     if (this.request) {
       this.request.removeListener('data', this.onRequestDataHandler)
@@ -299,8 +339,14 @@ export default class HttpGetReader extends Readable {
 
     if (this.options.transform) {
       this.options.transform.removeListener('data', this.onTransformDataHandler)
-      this.options.transform.removeListener('error', this.onTransformErrorHandler)
-      this.options.transform.removeListener('close', this.onTransformCloseHandler)
+      this.options.transform.removeListener(
+        'error',
+        this.onTransformErrorHandler,
+      )
+      this.options.transform.removeListener(
+        'close',
+        this.onTransformCloseHandler,
+      )
       this.options.transform.removeListener('end', this.onTransformEndHandler)
       this.options.transform = null
     }
@@ -309,7 +355,7 @@ export default class HttpGetReader extends Readable {
   /**
    * Default response handler
    */
-  static defaultResponseHandler (response: any, request: any): boolean {
+  static defaultResponseHandler(response: any, request: any): boolean {
     if (response.statusCode === 200 || response.statusCode === 404) {
       return true
     }
@@ -318,6 +364,10 @@ export default class HttpGetReader extends Readable {
       return false
     }
 
-    throw new Error(`HTTP ${response.method} request failed with ${response.statusCode}: ${response.statusMessage || 'no details'}`)
+    throw new Error(
+      `HTTP ${response.method} request failed with ${
+        response.statusCode
+      }: ${response.statusMessage || 'no details'}`,
+    )
   }
 }

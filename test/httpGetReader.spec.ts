@@ -16,13 +16,15 @@ describe('HttpGetReader', () => {
 
     const reader = new HttpGetReader('http://dataplug.io/data')
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve, reject) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
           .on('error', reject)
-          .on('data', (chunk: any) => { data += chunk })
-      })
+          .on('data', (chunk: any) => {
+            data += chunk
+          })
+      }),
     )
       .resolves.toEqual('')
       .then(done)
@@ -36,13 +38,15 @@ describe('HttpGetReader', () => {
 
     const reader = new HttpGetReader('http://dataplug.io/data')
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve, reject) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
           .on('error', reject)
-          .on('data', (chunk: any) => { data += chunk })
-      })
+          .on('data', (chunk: any) => {
+            data += chunk
+          })
+      }),
     )
       .resolves.toEqual('')
       .then(done)
@@ -56,13 +60,15 @@ describe('HttpGetReader', () => {
 
     const reader = new HttpGetReader('http://dataplug.io/data')
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve, reject) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
           .on('error', reject)
-          .on('data', (chunk: any) => { data += chunk })
-      })
+          .on('data', (chunk: any) => {
+            data += chunk
+          })
+      }),
     )
       .resolves.toEqual('data')
       .then(done)
@@ -76,18 +82,19 @@ describe('HttpGetReader', () => {
 
     const transform = new PassThrough()
     const reader = new HttpGetReader('http://dataplug.io/data', {
-      transform
+      transform,
     })
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve, reject) => {
         let data = ''
-        reader
-          .on('error', reject)
+        reader.on('error', reject)
         transform
           .on('end', () => resolve(data))
           .on('error', reject)
-          .on('data', (chunk: any) => { data += chunk })
-      })
+          .on('data', (chunk: any) => {
+            data += chunk
+          })
+      }),
     )
       .resolves.toEqual('data')
       .then(done)
@@ -101,14 +108,12 @@ describe('HttpGetReader', () => {
       .reply(200, 'data')
 
     const reader = new HttpGetReader('http://dataplug.io/no-data', {
-      abortOnError: true
+      abortOnError: true,
     })
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
-        reader
-          .on('error', reject)
-          .on('end', resolve)
-      })
+      new BluebirdPromise((resolve, reject) => {
+        reader.on('error', reject).on('end', resolve)
+      }),
     )
       .rejects.toThrow(/No match for request/)
       .then(done)
@@ -122,10 +127,10 @@ describe('HttpGetReader', () => {
       .reply(200, 'data')
 
     const reader = new HttpGetReader('http://dataplug.io/no-data', {
-      abortOnError: false
+      abortOnError: false,
     })
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
+      new BluebirdPromise((resolve, reject) => {
         let data = ''
         reader
           .on('end', () => resolve(data))
@@ -133,7 +138,7 @@ describe('HttpGetReader', () => {
           .on('data', (chunk: any) => {
             data += chunk
           })
-      })
+      }),
     )
       .resolves.toEqual('')
       .then(done)
@@ -149,14 +154,12 @@ describe('HttpGetReader', () => {
     const transform = new PassThrough()
     const reader = new HttpGetReader('http://dataplug.io/no-data/transform', {
       transform,
-      abortOnError: true
+      abortOnError: true,
     })
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
-        reader
-          .on('error', reject)
-          .on('end', resolve)
-      })
+      new BluebirdPromise((resolve, reject) => {
+        reader.on('error', reject).on('end', resolve)
+      }),
     )
       .rejects.toThrow(/No match for request/)
       .then(done)
@@ -170,20 +173,22 @@ describe('HttpGetReader', () => {
       .reply(200, 'data')
 
     const transform = new Transform({
-      transform: (chunk: any, encoding: string, callback: (error: Error, smth: any) => void) => {
+      transform: (
+        chunk: any,
+        encoding: string,
+        callback: (error: Error, smth: any) => void,
+      ) => {
         callback(new Error('expected'), null)
-      }
+      },
     })
     const reader = new HttpGetReader('http://dataplug.io/data', {
       transform,
-      abortOnError: true
+      abortOnError: true,
     })
     expect(
-      new BluebirdPromise((resolve: any, reject: any) => {
-        reader
-          .on('error', reject)
-          .on('end', resolve)
-      })
+      new BluebirdPromise((resolve, reject) => {
+        reader.on('error', reject).on('end', resolve)
+      }),
     )
       .rejects.toThrow(/expected/)
       .then(done)
