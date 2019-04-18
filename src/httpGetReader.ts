@@ -100,9 +100,9 @@ export default class HttpGetReader extends Readable {
       gzip: true
     }
 
-    logger.log('verbose', 'Starting HTTP GET request to \'%s\'', options.url)
-    logger.log('debug', 'Headers:', options.headers)
-    logger.log('debug', 'Query:', options.qs)
+    logger.log('verbose', `Starting HTTP GET request to ${options.url}`)
+    logger.log('debug', 'Headers', options.headers)
+    logger.log('debug', 'Query', options.qs)
 
     this.request = request(options)
     this.request
@@ -118,7 +118,7 @@ export default class HttpGetReader extends Readable {
     try {
       this._startRequest()
     } catch (error) {
-      logger.log('error', 'Error while starting HTTP GET request to \'%s\':', this.url, error)
+      logger.log('error', `Error while starting HTTP GET request to '${this.url}'`, error)
       this.emit('error', error)
 
       this.detachFromStreams()
@@ -130,7 +130,7 @@ export default class HttpGetReader extends Readable {
    * Handles request error
    */
   private onRequestError (error: any = undefined): void {
-    logger.log('error', 'Error while making HTTP GET request to \'%s\':', this.url, error)
+    logger.log('error', `Error while making HTTP GET request to '${this.url}'`, error)
 
     if (this.options.abortOnError) {
       this.emit('error', error)
@@ -160,7 +160,7 @@ export default class HttpGetReader extends Readable {
    * Handles request end
    */
   private onRequestEnd (): void {
-    logger.log('verbose', 'HTTP GET request to \'%s\' complete', this.url)
+    logger.log('verbose', `HTTP GET request to ${this.url} complete`)
 
     if (!this.options.transform) {
       this.detachFromStreams()
@@ -174,8 +174,8 @@ export default class HttpGetReader extends Readable {
    * Handles request data
    */
   private onRequestData (chunk: any): void {
-    logger.log('debug', 'Received data while making HTTP GET request to \'%s\'', this.url)
-    logger.log('silly', 'Chunk:', _.toString(chunk))
+    logger.log('debug', `Received data while making HTTP GET request to ${this.url}`)
+    logger.log('silly', 'Chunk', _.toString(chunk))
 
     if (!this.options.transform) {
       this.push(chunk)
@@ -186,17 +186,17 @@ export default class HttpGetReader extends Readable {
    * Handles request response
    */
   private onRequestResponse (response: any): void {
-    logger.log('debug', 'Received response while making HTTP GET request to \'%s\'', this.url)
-    logger.log('debug', 'Response HTTP version:', response.httpVersion)
-    logger.log('debug', 'Response headers:', response.headers)
-    logger.log('debug', 'Response status code:', response.statusCode)
-    logger.log('debug', 'Response status message:', response.statusMessage)
+    logger.log('debug', `Received response while making HTTP GET request to ${this.url}`)
+    logger.log('debug', 'Response HTTP version', response.httpVersion)
+    logger.log('debug', 'Response headers', response.headers)
+    logger.log('debug', 'Response status code', response.statusCode)
+    logger.log('debug', 'Response status message', response.statusMessage)
 
     let shouldProcessData: boolean
     try {
       shouldProcessData = this.options.responseHandler(response, this.request)
     } catch (error) {
-      logger.log('error', 'Error while handling response to HTTP GET request to \'%s\':', this.url, error)
+      logger.log('error', `Error while handling response to HTTP GET request to '${this.url}'`, error)
 
       this.emit('error', error)
       this.detachFromStreams()
@@ -205,7 +205,7 @@ export default class HttpGetReader extends Readable {
     }
 
     if (shouldProcessData) {
-      logger.log('debug', 'Processing response data from paged HTTP GET request to \'%s\'', this.url)
+      logger.log('debug', `Processing response data from paged HTTP GET request to '${this.url}'`, this.url)
       this.request
         .on('data', this.onRequestDataHandler)
         .on('close', this.onRequestCloseHandler)
@@ -221,18 +221,18 @@ export default class HttpGetReader extends Readable {
       }
     } else {
       this.detachFromStreams()
-      logger.log('debug', 'Going to retry HTTP GET request to \'%s\'', this.url)
+      logger.log('debug', `Going to retry HTTP GET request to ${this.url}`)
       Promise.resolve(shouldProcessData)
         .then((shouldProcessData) => {
           if (shouldProcessData) {
             throw new Error('responseHandler should not return promised true')
           }
 
-          logger.log('debug', 'Retrying HTTP GET request to \'%s\'', this.url)
+          logger.log('debug', `Retrying HTTP GET request to ${this.url}`)
           this._startRequest()
         })
         .catch((error) => {
-          logger.log('error', 'Error while waiting for retrying of HTTP GET request to \'%s\':', this.url, error)
+          logger.log('error', `Error while waiting for retrying of HTTP GET request to '${this.url}'`, error)
 
           this.emit('error', error)
           this.detachFromStreams()
@@ -245,7 +245,7 @@ export default class HttpGetReader extends Readable {
    * Handles transform error
    */
   private onTransformError (error: Error): void {
-    logger.log('error', 'Error while transforming data from HTTP GET request to \'%s\':', this.url, error)
+    logger.log('error', `Error while transforming data from HTTP GET request to '${this.url}'`, error)
 
     if (this.options.abortOnError) {
       this.emit('error', error)
@@ -266,7 +266,7 @@ export default class HttpGetReader extends Readable {
    * Handles transform end
    */
   private onTransformEnd (): void {
-    logger.log('verbose', 'Transformation of data from HTTP GET request to \'%s\' ended', this.url)
+    logger.log('verbose', `Transformation of data from HTTP GET request to ${this.url} ended`)
 
     this.push(null)
     this.detachFromStreams()
@@ -276,8 +276,8 @@ export default class HttpGetReader extends Readable {
    * Handles transform data
    */
   private onTransformData (chunk: any): void {
-    logger.log('debug', 'Transformed data from HTTP GET request to \'%s\'', this.url)
-    logger.log('silly', 'Chunk:', chunk)
+    logger.log('debug', `Transformed data from HTTP GET request to ${this.url}`)
+    logger.log('silly', 'Chunk', chunk)
 
     this.push(chunk)
   }
@@ -286,7 +286,7 @@ export default class HttpGetReader extends Readable {
    * Detach from streams
    */
   private detachFromStreams (): void {
-    logger.log('verbose', 'Detaching from streams of HTTP GET request to \'%s\'', this.url)
+    logger.log('verbose', `Detaching from streams of HTTP GET request to ${this.url}`)
 
     if (this.request) {
       this.request.removeListener('data', this.onRequestDataHandler)

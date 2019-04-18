@@ -256,12 +256,13 @@ describe('PagedHttpGetReader', () => {
       abortOnError: true
     })
     expect(
-      new BluebirdPromise((resolve: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         reader
-          .on('error', resolve)
+          .on('error', reject)
+          .on('end', resolve)
       })
     )
-      .resolves.toMatch(/No match for request/)
+      .rejects.toThrow(/No match for request/)
       .then(done)
     reader.resume()
   })
@@ -292,12 +293,13 @@ describe('PagedHttpGetReader', () => {
       abortOnError: true
     })
     expect(
-      new BluebirdPromise((resolve: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         reader
-          .on('error', resolve)
+          .on('error', reject)
+          .on('end', resolve)
       })
     )
-      .resolves.toMatch(/No match for request/)
+      .rejects.toThrow(/No match for request/)
       .then(done)
     reader.resume()
   })
@@ -313,12 +315,12 @@ describe('PagedHttpGetReader', () => {
       abortOnError: true
     })
     expect(
-      new BluebirdPromise((resolve: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         reader
-          .on('error', resolve)
+          .on('error', reject)
       })
     )
-      .resolves.toMatch(/No match for request/)
+      .rejects.toThrow(/No match for request/)
       .then(done)
     reader.resume()
   })
@@ -338,12 +340,13 @@ describe('PagedHttpGetReader', () => {
       abortOnError: true
     })
     expect(
-      new BluebirdPromise((resolve: any) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         reader
-          .on('error', resolve)
+          .on('error', reject)
+          .on('end', resolve)
       })
     )
-      .resolves.toMatch(/expected/)
+      .rejects.toThrow(/expected/)
       .then(done)
     reader.resume()
   })
@@ -375,13 +378,13 @@ describe('PagedHttpGetReader', () => {
       abortOnError: true
     })
     expect(
-      new BluebirdPromise((resolve) => {
+      new BluebirdPromise((resolve: any, reject: any) => {
         reader
-          .on('error', resolve)
+          .on('error', reject)
+          .on('end', resolve)
       })
-
     )
-      .resolves.toMatch(/No match for request/)
+      .rejects.toThrow(/No match for request/)
       .then(done)
     reader.resume()
   })
